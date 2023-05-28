@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,53 +12,64 @@ using Flappy_bird;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 
+
+using System.Windows.Forms;
+using Microsoft.VisualBasic;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
+
+
 namespace FlappyBird
 {
     public partial class Form1 : Form
     {
-        Player bird;
-        TheWall wall1;
-        TheWall wall2;
-        TheWall wall3;
-        TheWall wall4;
-        TheWall wall5;
-        TheWall wall6;
-        Buttons button = new Buttons();
-        Button buttonPause;
-
-        float gravity;
+        Player bird; // объект класса птички
+        TheWall wall1; // объект класса верхней стены
+        TheWall wall2; // объект класса верхней стены
+        float gravity = 0; // переменная отвечающая за гравитацию
+        int score = 0;
+        bool flag = false; // метка для информационного окна
+        System.Windows.Forms.Label informationManagement; // окно с информацией о управление
+        System.Windows.Forms.Label informationLoss; // окно с информацией о проигрыше
+        System.Windows.Forms.Label informationPoints; // окно с кол-вом очков
+        /// <summary>
+        /// Метод конструктор
+        /// </summary>
         public Form1()
         {
             this.BackgroundImage = Image.FromFile(@"D:\Проекты\Flappy bird\картинки\фон.png");
             InitializeComponent();
             timer1.Interval = 10;
             timer1.Tick += new EventHandler(update);
-
-
             Init();
+            InformationWindow();
             Invalidate();
         }
 
+        /// <summary>
+        /// Метод для инициализации объектов и присвоение значений переменным
+        /// </summary>
         public void Init()
         {
+            informationManagement = new System.Windows.Forms.Label();
+            informationLoss = new System.Windows.Forms.Label();
+            informationPoints = new System.Windows.Forms.Label();
+            wasted.Visible = false;
+            InformationPoints();
+            informationPoints.Refresh();
+            informationPoints.Update();
+            informationPoints.Text = "Score: " + score.ToString();
             bird = new Player(200, 90);
             wall1 = new TheWall(450, -300, true);
             wall2 = new TheWall(450, 250);
-            //wall3 = new TheWall(1100, -100, true);
-            //wall4 = new TheWall(1100, 350);
-            //wall5 = new TheWall(1400, -20, true);
-            //wall6 = new TheWall(1400, 430);
-
-
-
-
-            gravity = 0;
-            this.Text = "Flappy Bird Score: 0";
-            timer1.Start();
-
-
+            this.Text = "Flappy Bird";
+            if (flag == true) timer1.Start();
         }
 
+        /// <summary>
+        /// Метод отвечающий за работу игры 
+        /// </summary>
+        /// <param name="sender"> ссылка на объект, вызвавающая событие </param>
+        /// <param name="e"> объект, относящийся к обрабатываемому событию </param>
         private void update(object sender, EventArgs e)
         {
             if (bird.y > 600)
@@ -71,7 +83,12 @@ namespace FlappyBird
             {
                 bird.isAlive = false;
                 timer1.Stop();
-                Init();
+                wasted.Visible = true;
+                InformationLoss();
+                informationLoss.Visible = true;
+                informationLoss.Text = $"Ваши очки: {score}";
+                score = 0;
+
             }
 
             if (bird.gravityValue != 0.1f)
@@ -81,9 +98,10 @@ namespace FlappyBird
 
             if (bird.isAlive)
             {
-                MoveWalls();
-            }
 
+                MoveWalls();
+
+            }
             Invalidate();
         }
 
@@ -115,8 +133,10 @@ namespace FlappyBird
         /// <param name="e"> объект, относящийся к обрабатываемому событию </param>
         private void NewWall(object sender, EventArgs e)
         {
-            if (wall2.x == bird.x - 100) this.Text = "Flappy Bird Score: " + ++bird.score;
-
+            if (wall2.x == bird.x - 100)
+            {       
+                informationPoints.Text = "Score: " + ++score;
+            }
             if (wall1.x < bird.x - 490)
             {
                 Random r = new Random();
@@ -128,7 +148,7 @@ namespace FlappyBird
         }
 
         /// <summary>
-        /// Метод движение стен
+        /// Метод реализующий движение стен
         /// </summary>
         private void MoveWalls()
         {
@@ -147,7 +167,7 @@ namespace FlappyBird
             Graphics graphics = e.Graphics;
 
             graphics.DrawImage(bird.birdImg, bird.x, bird.y, bird.size, bird.size);
-            
+
             graphics.DrawImage(wall1.wallImg, wall1.x, wall1.y, wall1.sizeX, wall1.sizeY);
             graphics.DrawImage(wall2.wallImg, wall2.x, wall2.y, wall2.sizeX, wall2.sizeY);
         }
@@ -159,14 +179,21 @@ namespace FlappyBird
         /// <param name="e"> объект, относящийся к обрабатываемому событию </param>
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if ((e.KeyValue == (char)Keys.Space || e.KeyValue == (char)Keys.Up) && bird.isAlive)
+
+            if (e.KeyValue == (char)Keys.Up && bird.isAlive)
             {
                 gravity = 0;
                 bird.gravityValue = -0.125f;
 
             }
-            
 
+            if (e.KeyValue == (char)Keys.Enter && flag == false)
+            {
+                flag = true;
+                informationManagement.Visible = false;
+                timer1.Start();
+
+            }
         }
 
         /// <summary>
@@ -186,19 +213,19 @@ namespace FlappyBird
         /// <summary>
         /// Метод для реализации выхода из приложение
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> ссылка на объект, вызвавающая событие </param>
+        /// <param name="e"> объект, относящийся к обрабатываемому событию </param>
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             timer1.Stop();
             DialogResult dialog = MessageBox.Show(
-             "Вы действительно хотите выйти из программы?",
-             "Завершение программы",
+             "Вы действительно хотите выйти из игры?",
+             "Завершение игры",
              MessageBoxButtons.YesNo,
              MessageBoxIcon.Warning
             );
             if (dialog == DialogResult.Yes) e.Cancel = false;
-      
+
             else
             {
                 e.Cancel = true;
@@ -206,6 +233,71 @@ namespace FlappyBird
             }
         }
 
+        /// <summary>
+        /// Метод для реализации нажатина на кнопку "ПРОДОЛЖИТЬ ИГРУ"
+        /// </summary>
+        /// <param name="sender"> ссылка на объект, вызвавающая событие </param>
+        /// <param name="e"> объект, относящийся к обрабатываемому событию </param>
+        private void button1_Click(object sender, EventArgs e)
+        {
+            wasted.Visible = false;
+            informationLoss.Visible = false;
+         
+            Init();
+            Invalidate();
+        }
 
+        /// <summary>
+        /// Метод заглушка
+        /// </summary>
+        /// <param name="sender"> ссылка на объект, вызвавающая событие </param>
+        /// <param name="e"> объект, относящийся к обрабатываемому событию </param>
+        private void Form1_Load(object sender, EventArgs e)
+        {
+        }
+
+        /// <summary>
+        /// Метод для реализации окна с информацией о игре
+        /// </summary>
+        private void InformationWindow()
+        {
+
+            informationManagement.Size = new Size(350, 180);
+            informationManagement.Text = "Информация об игре:\r\nУправление в игры осуществляется клавишей стрелочки вверх, а также кнопками мыши.\r\nВ верхнем левом углу показаны ваши набранные очки.\r\nС каждыми набранными 10 очками, скорость птички увеличивается.\r\nЧтобы начать игру нажмите на ENTER, для возобновления игры после проигрыша нажмите либо ENTER, либо на иконку c надписью “продолжить игру”\r\n";
+            informationManagement.TextAlign = ContentAlignment.MiddleCenter;
+            informationManagement.Location = new Point(90, 80);
+            //Color transparentColor = Color.FromArgb(128, 255, 255, 255);
+            //informationManagement.BackColor = transparentColor;
+            this.Controls.Add(informationManagement);
+
+
+        }
+
+        /// <summary>
+        /// Метод для реализации окна после проигрыша с информацией о набранных очках
+        /// </summary>
+        private void InformationLoss()
+        {
+            informationLoss.Size = new Size(230, 90);
+            informationLoss.TextAlign = ContentAlignment.TopCenter;
+            informationLoss.Location = new Point(150, 120);
+            informationLoss.Font = new Font("Showcard Gothic", 18F, FontStyle.Regular);
+            //Color transparentColor = Color.FromArgb(0, 255, 255, 255);
+         
+            this.Controls.Add(informationLoss);
+        }
+
+        /// <summary>
+        /// Метод длч реализации окна с информационей о кол-ве набранных очков
+        /// </summary>
+        private void InformationPoints()
+        {
+            informationPoints.Update();
+            informationPoints.Size = new Size(120, 30);
+            informationPoints.Location = new Point(400, 0);
+            informationPoints.Font = new Font("Showcard Gothic", 18F, FontStyle.Regular);
+            this.Controls.Add(informationPoints);
+
+        }
     }
 }

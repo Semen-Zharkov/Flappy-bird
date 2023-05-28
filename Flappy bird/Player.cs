@@ -11,18 +11,33 @@ namespace FlappyBird
 
     class Player
     {
+        // координата X птички
         public float x;
+
+        //координата Y птички
         public float y;
 
+        // размер птички 
         public int size;
+        
+        // кол-во набранных очков
         public int score;
 
+        // значение гравитации 
         public float gravityValue;
 
+        // картинка птички
         public Image birdImg;
 
+        // переменная хранящая значение, true - если птичка жива
+        // false - если разбилась
         public bool isAlive;
 
+        /// <summary>
+        /// Метод конструктор где происходит создание птички
+        /// </summary>
+        /// <param name="x"> координата X птички </param>
+        /// <param name="y"> координата Y птички </param>
         public Player(int x, int y)
         {
             birdImg = new Bitmap("D:\\Проекты\\Flappy bird\\картинки\\bird.png");
