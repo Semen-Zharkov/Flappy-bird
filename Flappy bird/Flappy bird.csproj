@@ -7,7 +7,16 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>False</UseWPF>
+    <StartupObject>FlappyBird.Program</StartupObject>
+    <AssemblyName>Flappy bird</AssemblyName>
+    <ApplicationIcon>Resources\flappyBirdjpg.ico</ApplicationIcon>
+    <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\flappyBirdjpg.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />

@@ -32,7 +32,7 @@ namespace FlappyBird
         /// <param name="isRotatedImage"> перменная отвечающая за переворот стены </param>
         public TheWall(int x, int y, bool isRotatedImage = false)
         {
-            wallImg = new Bitmap("D:\\Проекты\\Flappy bird\\картинки\\tube.png");
+            wallImg = new Bitmap("D:\\Проекты\\Flappy bird\\Flappy bird\\Flappy bird\\Resources\\tube.png");
             this.x = x;
             this.y = y;
             sizeX = 170;

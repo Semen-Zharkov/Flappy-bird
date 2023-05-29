@@ -40,7 +40,7 @@ namespace FlappyBird
         /// <param name="y"> координата Y птички </param>
         public Player(int x, int y)
         {
-            birdImg = new Bitmap("D:\\Проекты\\Flappy bird\\картинки\\bird.png");
+            birdImg = new Bitmap("D:\\Проекты\\Flappy bird\\Flappy bird\\Flappy bird\\Resources\\bird.png");
             this.x = x;
             this.y = y;
             size = 50;

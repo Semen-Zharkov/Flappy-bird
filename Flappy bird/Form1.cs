@@ -24,22 +24,33 @@ namespace FlappyBird
     {
         Player bird; // объект класса птички
         TheWall wall1; // объект класса верхней стены
-        TheWall wall2; // объект класса верхней стены
+        TheWall wall2; // объект класса нижней стены
         float gravity = 0; // переменная отвечающая за гравитацию
-        int score = 0;
+        int score = 0; // кол-во очков
+        int countScore = 0; // кол-во очков для ускорения движения
         bool flag = false; // метка для информационного окна
         System.Windows.Forms.Label informationManagement; // окно с информацией о управление
         System.Windows.Forms.Label informationLoss; // окно с информацией о проигрыше
         System.Windows.Forms.Label informationPoints; // окно с кол-вом очков
+
         /// <summary>
         /// Метод конструктор
         /// </summary>
         public Form1()
         {
-            this.BackgroundImage = Image.FromFile(@"D:\Проекты\Flappy bird\картинки\фон.png");
+            // Load the image file
+            var icon = new Icon("D:\\Проекты\\Flappy bird\\Flappy bird\\Flappy bird\\Resources\\flappyBirdjpg.ico");
+
+            // Set the icon for the main form
+            this.Icon = icon;
+
+            // Set the icon for the application
+
+            this.BackgroundImage = Image.FromFile("D:\\Проекты\\Flappy bird\\Flappy bird\\Flappy bird\\Resources\\фон.png");
             InitializeComponent();
             timer1.Interval = 10;
             timer1.Tick += new EventHandler(update);
+          
             Init();
             InformationWindow();
             Invalidate();
@@ -52,12 +63,11 @@ namespace FlappyBird
         {
             informationManagement = new System.Windows.Forms.Label();
             informationLoss = new System.Windows.Forms.Label();
-            informationPoints = new System.Windows.Forms.Label();
+            if(informationPoints==null)
+                informationPoints = new System.Windows.Forms.Label();
             wasted.Visible = false;
             InformationPoints();
-            informationPoints.Refresh();
-            informationPoints.Update();
-            informationPoints.Text = "Score: " + score.ToString();
+            pointsImage();
             bird = new Player(200, 90);
             wall1 = new TheWall(450, -300, true);
             wall2 = new TheWall(450, 250);
@@ -88,6 +98,7 @@ namespace FlappyBird
                 informationLoss.Visible = true;
                 informationLoss.Text = $"Ваши очки: {score}";
                 score = 0;
+                countScore = 0;
 
             }
 
@@ -133,9 +144,10 @@ namespace FlappyBird
         /// <param name="e"> объект, относящийся к обрабатываемому событию </param>
         private void NewWall(object sender, EventArgs e)
         {
-            if (wall2.x == bird.x - 100)
+            if (wall2.x == (bird.x - 200))
             {       
                 informationPoints.Text = "Score: " + ++score;
+                if (score % 10 == 0) countScore++;
             }
             if (wall1.x < bird.x - 490)
             {
@@ -152,8 +164,16 @@ namespace FlappyBird
         /// </summary>
         private void MoveWalls()
         {
-            wall1.x -= 5f;
-            wall2.x -= 5f;
+            if (countScore == 0)
+            {
+                wall1.x -= 5f;
+                wall2.x -= 5f;
+            }
+            else
+            {
+                wall1.x = wall1.x - (5f * countScore);
+                wall2.x = wall2.x - (5f * countScore);
+            }
             NewWall(null, null);
         }
 
@@ -167,7 +187,6 @@ namespace FlappyBird
             Graphics graphics = e.Graphics;
 
             graphics.DrawImage(bird.birdImg, bird.x, bird.y, bird.size, bird.size);
-
             graphics.DrawImage(wall1.wallImg, wall1.x, wall1.y, wall1.sizeX, wall1.sizeY);
             graphics.DrawImage(wall2.wallImg, wall2.x, wall2.y, wall2.sizeX, wall2.sizeY);
         }
@@ -263,7 +282,7 @@ namespace FlappyBird
         {
 
             informationManagement.Size = new Size(350, 180);
-            informationManagement.Text = "Информация об игре:\r\nУправление в игры осуществляется клавишей стрелочки вверх, а также кнопками мыши.\r\nВ верхнем левом углу показаны ваши набранные очки.\r\nС каждыми набранными 10 очками, скорость птички увеличивается.\r\nЧтобы начать игру нажмите на ENTER, для возобновления игры после проигрыша нажмите либо ENTER, либо на иконку c надписью “продолжить игру”\r\n";
+            informationManagement.Text = "Информация об игре:\r\nУправление в игры осуществляется клавишей стрелочки вверх, а также кнопками мыши.\r\nВ верхнем левом углу показаны ваши набранные очки.\r\nС каждыми набранными 10 очками, скорость птички увеличивается.\r\nЧтобы начать игру нажмите на ENTER, для возобновления игры после проигрыша нажмите на иконку c надписью “продолжить игру”\r\n";
             informationManagement.TextAlign = ContentAlignment.MiddleCenter;
             informationManagement.Location = new Point(90, 80);
             //Color transparentColor = Color.FromArgb(128, 255, 255, 255);
@@ -283,7 +302,6 @@ namespace FlappyBird
             informationLoss.Location = new Point(150, 120);
             informationLoss.Font = new Font("Showcard Gothic", 18F, FontStyle.Regular);
             //Color transparentColor = Color.FromArgb(0, 255, 255, 255);
-         
             this.Controls.Add(informationLoss);
         }
 
@@ -292,12 +310,31 @@ namespace FlappyBird
         /// </summary>
         private void InformationPoints()
         {
+            informationPoints.Text = "Score: " + score.ToString();
             informationPoints.Update();
             informationPoints.Size = new Size(120, 30);
-            informationPoints.Location = new Point(400, 0);
+            informationPoints.Location = new Point(385, 0);
             informationPoints.Font = new Font("Showcard Gothic", 18F, FontStyle.Regular);
+            Color transparentColor = Color.FromArgb(1, 255, 255, 255);
+            informationPoints.BackColor = transparentColor;
             this.Controls.Add(informationPoints);
 
+        }
+
+        /// <summary>
+        /// Метод для отображение иконки монет
+        /// </summary>
+        private void pointsImage()
+        {
+            var imageControl = new PictureBox();
+            imageControl.Image = Image.FromFile("D:\\Проекты\\Flappy bird\\Flappy bird\\Flappy bird\\Resources\\points.png");
+            imageControl.SizeMode = PictureBoxSizeMode.StretchImage;
+            this.Controls.Add(imageControl);
+            Color transparentColo = Color.FromArgb(1, 255, 255, 255);
+            imageControl.BackColor = transparentColo;
+            imageControl.BringToFront();
+            imageControl.Size = new Size(23, 23);
+            imageControl.Location = new Point(500, 5);
         }
     }
 }
