@@ -38,14 +38,6 @@ namespace FlappyBird
         /// </summary>
         public Form1()
         {
-            // Load the image file
-            var icon = new Icon("D:\\Проекты\\Flappy bird\\Flappy bird\\Flappy bird\\Resources\\flappyBirdjpg.ico");
-
-            // Set the icon for the main form
-            this.Icon = icon;
-
-            // Set the icon for the application
-
             this.BackgroundImage = Image.FromFile("D:\\Проекты\\Flappy bird\\Flappy bird\\Flappy bird\\Resources\\фон.png");
             InitializeComponent();
             timer1.Interval = 10;
